@@ -1,0 +1,17 @@
+{
+  "name": "The Braai Pit",
+  "short_name": "Braai Pit",
+  "description": "Your crew's HQ - braai, bikes, rugby & banter",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#FF4500",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

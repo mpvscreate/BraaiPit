@@ -1,0 +1,108 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  transition: opacity 0.5s ease-out;
+}
+
+.splash.splash-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.splash-embers {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ember {
+  position: absolute;
+  bottom: 40%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #FF4500;
+  box-shadow: 0 0 6px 2px rgba(255, 69, 0, 0.6);
+  animation: emberFloat linear infinite;
+  opacity: 0;
+}
+
+.ember:nth-child(odd) {
+  background: #FF6B35;
+  width: 3px;
+  height: 3px;
+}
+
+.ember:nth-child(3n) {
+  background: #FFD700;
+  width: 2px;
+  height: 2px;
+  box-shadow: 0 0 4px 1px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes emberFloat {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+  10% { opacity: 1; }
+  80% { opacity: 0.5; }
+  100% {
+    transform: translateY(-70vh) translateX(var(--drift, 20px)) scale(0);
+    opacity: 0;
+  }
+}
+
+.splash-fire {
+  font-size: 80px;
+  animation: fireGlow 1s ease-in-out infinite alternate, splashPop 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 30px rgba(255, 69, 0, 0.8));
+  line-height: 1;
+}
+
+@keyframes fireGlow {
+  from { filter: drop-shadow(0 0 20px rgba(255, 69, 0, 0.6)); transform: scale(1); }
+  to { filter: drop-shadow(0 0 50px rgba(255, 69, 0, 1)); transform: scale(1.06); }
+}
+
+@keyframes splashPop {
+  from { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.splash-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 44px;
+  letter-spacing: 5px;
+  color: white;
+  animation: splashFadeUp 0.8s ease-out 0.3s both;
+  margin: 0;
+  line-height: 1;
+}
+
+.splash-title span {
+  color: #FF4500;
+}
+
+.splash-tagline {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: splashFadeUp 0.8s ease-out 0.6s both;
+  margin: 0;
+}
+
+@keyframes splashFadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
