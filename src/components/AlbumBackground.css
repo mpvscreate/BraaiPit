@@ -82,6 +82,104 @@
   letter-spacing: 1px;
 }
 
+/* Reveal button */
+.album-reveal-btn {
+  position: fixed;
+  bottom: 76px;
+  left: 12px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  opacity: 0.6;
+  transition: opacity 0.2s, transform 0.2s;
+  z-index: 2;
+}
+
+.album-reveal-btn:active {
+  opacity: 1;
+  transform: scale(0.92);
+}
+
+/* Full-screen reveal overlay */
+.album-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  pointer-events: auto;
+  animation: revealIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 32px;
+}
+
+@keyframes revealIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.album-reveal-cover {
+  max-width: min(85vw, 360px);
+  max-height: 50vh;
+  border-radius: 8px;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  animation: revealCoverIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+@keyframes revealCoverIn {
+  from { opacity: 0; transform: scale(0.85) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.album-reveal-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  animation: revealCoverIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.album-reveal-name {
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 3px;
+  color: #fff;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.album-reveal-artist {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 1.5px;
+}
+
+.album-reveal-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 2px 0 0;
+  animation: revealProgress 5s linear forwards;
+}
+
+@keyframes revealProgress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
 /* Light mode */
 :root[data-theme="light"] .album-bg-darken {
   background: rgba(245, 240, 235, 0.2);
@@ -97,4 +195,9 @@
 
 :root[data-theme="light"] .album-bg-artist {
   color: rgba(0, 0, 0, 0.6);
+}
+
+:root[data-theme="light"] .album-reveal-btn {
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(0, 0, 0, 0.7);
 }
