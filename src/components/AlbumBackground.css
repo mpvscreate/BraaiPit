@@ -42,11 +42,12 @@
   background: rgba(0, 0, 0, 0.15);
 }
 
-/* Info bar: button + album info pill, fixed bottom-right above nav */
+/* Info bar: button + album info pill, centered just above nav */
 .album-bg-bar {
   position: fixed;
-  bottom: calc(var(--nav-height) + var(--safe-bottom) + 62px);
-  right: 12px;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 10px);
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   gap: 8px;
