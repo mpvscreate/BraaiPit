@@ -25,8 +25,8 @@ export default function AlbumBackground() {
   const [phase, setPhase] = useState<'show' | 'crossfade'>('show')
   const [ready, setReady] = useState(false)
   const [reveal, setReveal] = useState(false)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
-  const revealTimer = useRef<ReturnType<typeof setTimeout>>()
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const revealTimer = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   useEffect(() => {
     preloadImage(current.image).then(() => setReady(true))
