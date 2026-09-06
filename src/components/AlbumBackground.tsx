@@ -4,25 +4,28 @@ import './AlbumBackground.css'
 
 export default function AlbumBackground() {
   const [album] = useState<AlbumBg>(getRandomAlbumBg)
-  const [show, setShow] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    requestAnimationFrame(() => setShow(true))
-  }, [])
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => setLoaded(true)
+    img.onerror = () => setLoaded(true)
+    img.src = album.image
+  }, [album.image])
 
   return (
-    <div className={`album-bg ${show ? 'visible' : ''}`}>
+    <div className={`album-bg ${loaded ? 'visible' : ''}`}>
       <div
-        className="album-bg-gradient"
-        style={{ background: album.gradient }}
+        className="album-bg-image"
+        style={{ backgroundImage: `url(${album.image})` }}
       />
-      {album.overlay && (
-        <div
-          className="album-bg-overlay"
-          style={{ background: album.overlay }}
-        />
-      )}
-      <div className="album-bg-noise" />
+      <div className="album-bg-darken" />
+      <div
+        className="album-bg-tint"
+        style={{ background: album.tint }}
+      />
+      <div className="album-bg-vignette" />
       <div className="album-bg-info">
         <span className="album-bg-name">{album.name}</span>
         <span className="album-bg-artist">{album.artist}</span>
