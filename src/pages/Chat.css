@@ -293,3 +293,16 @@
   0%, 60%, 100% { transform: translateY(0); opacity: 0.35; }
   30% { transform: translateY(-8px); opacity: 1; }
 }
+
+:root[data-theme="light"] .chat-header-bar {
+  background: rgba(245, 240, 235, 0.9);
+}
+
+:root[data-theme="light"] .chat-input-bar {
+  background: rgba(245, 240, 235, 0.92);
+}
+
+:root[data-theme="light"] .reaction-chip {
+  background: rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.08);
+}

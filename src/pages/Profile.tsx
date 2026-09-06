@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Camera, LogOut, Bell, Moon, Share2, ChevronRight, Copy, Check } from 'lucide-react'
+import { Camera, LogOut, Bell, Moon, Sun, Share2, ChevronRight, Copy, Check } from 'lucide-react'
 import { supabase, type Member } from '../lib/supabase'
+import { getTheme, setTheme, type Theme } from '../lib/theme'
 import './Profile.css'
 
 interface Props {
@@ -11,6 +12,7 @@ interface Props {
 export default function Profile({ member, onLogout }: Props) {
   const [copied, setCopied] = useState(false)
   const [crew, setCrew] = useState<{ name: string; is_online: boolean }[]>([])
+  const [theme, setThemeState] = useState<Theme>(getTheme)
 
   useEffect(() => {
     supabase
@@ -63,10 +65,14 @@ export default function Profile({ member, onLogout }: Props) {
             <span>Notifications</span>
             <ChevronRight size={18} className="settings-chevron" />
           </button>
-          <button className="settings-item">
-            <Moon size={20} />
+          <button className="settings-item" onClick={() => {
+            const next = theme === 'dark' ? 'light' : 'dark'
+            setTheme(next)
+            setThemeState(next)
+          }}>
+            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
             <span>Appearance</span>
-            <span className="settings-value">Dark</span>
+            <span className="settings-value">{theme === 'dark' ? 'Dark' : 'Light'}</span>
             <ChevronRight size={18} className="settings-chevron" />
           </button>
         </div>

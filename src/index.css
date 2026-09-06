@@ -43,6 +43,27 @@
   color-scheme: dark;
 }
 
+:root[data-theme="light"] {
+  --bg-primary: #F5F0EB;
+  --bg-secondary: #EDE7E0;
+  --bg-card: #FFFFFF;
+  --bg-elevated: #F0EAE3;
+  --bg-input: #FFFFFF;
+
+  --text-primary: #1a1a1a;
+  --text-secondary: #555;
+  --text-muted: #888;
+
+  --border: #D9D0C7;
+  --border-light: #E5DDD5;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -50,7 +71,7 @@
 }
 
 html {
-  background: #0a0a0a;
+  background: var(--bg-primary);
 }
 
 html, body, #root {
