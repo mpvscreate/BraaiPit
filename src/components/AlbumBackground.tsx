@@ -88,7 +88,7 @@ export default function AlbumBackground() {
 
       <div className={`album-bg-bar ${ready ? 'visible' : ''}`}>
         <button className="album-reveal-btn" onClick={showReveal} aria-label="View album cover">
-          <Disc3 size={16} />
+          <Disc3 size={13} />
         </button>
         <div className="album-bg-info">
           <span className="album-bg-name">{activeAlbum.name}</span>
