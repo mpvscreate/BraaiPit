@@ -42,70 +42,69 @@
   background: rgba(0, 0, 0, 0.15);
 }
 
-.album-bg-vignette {
-  display: none;
+/* Info bar: button + album info pill, fixed bottom-right above nav */
+.album-bg-bar {
+  position: fixed;
+  bottom: calc(var(--nav-height) + var(--safe-bottom) + 62px);
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 1s ease-out;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.album-bg-bar.visible {
+  opacity: 0.8;
+  pointer-events: auto;
 }
 
 .album-bg-info {
-  position: absolute;
-  bottom: 76px;
-  right: 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
-  opacity: 0;
-  transition: opacity 1s ease-out;
-  pointer-events: none;
-  padding: 6px 10px;
+  padding: 5px 10px;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
-.album-bg-info.visible {
-  opacity: 0.7;
-}
-
 .album-bg-name {
   font-family: var(--font-display);
-  font-size: 13px;
-  letter-spacing: 2px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
   color: #fff;
   text-transform: uppercase;
 }
 
 .album-bg-artist {
-  font-size: 10px;
+  font-size: 9px;
   color: rgba(255, 255, 255, 0.85);
   letter-spacing: 1px;
 }
 
 /* Reveal button */
 .album-reveal-btn {
-  position: fixed;
-  bottom: 76px;
-  left: 12px;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  pointer-events: auto;
-  opacity: 0.6;
-  transition: opacity 0.2s, transform 0.2s;
-  z-index: 2;
+  flex-shrink: 0;
+  transition: transform 0.2s;
 }
 
 .album-reveal-btn:active {
-  opacity: 1;
-  transform: scale(0.92);
+  transform: scale(0.88);
 }
 
 /* Full-screen reveal overlay */
@@ -185,7 +184,8 @@
   background: rgba(245, 240, 235, 0.2);
 }
 
-:root[data-theme="light"] .album-bg-info {
+:root[data-theme="light"] .album-bg-info,
+:root[data-theme="light"] .album-reveal-btn {
   background: rgba(255, 255, 255, 0.5);
 }
 
@@ -198,6 +198,5 @@
 }
 
 :root[data-theme="light"] .album-reveal-btn {
-  background: rgba(255, 255, 255, 0.5);
   color: rgba(0, 0, 0, 0.7);
 }

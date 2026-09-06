@@ -84,19 +84,17 @@ export default function AlbumBackground() {
         )}
 
         <div className="album-bg-darken" />
-        <div className="album-bg-vignette" />
+      </div>
 
-        <div className={`album-bg-info ${ready ? 'visible' : ''}`}>
+      <div className={`album-bg-bar ${ready ? 'visible' : ''}`}>
+        <button className="album-reveal-btn" onClick={showReveal} aria-label="View album cover">
+          <Disc3 size={16} />
+        </button>
+        <div className="album-bg-info">
           <span className="album-bg-name">{activeAlbum.name}</span>
           <span className="album-bg-artist">{activeAlbum.artist}</span>
         </div>
       </div>
-
-      {ready && (
-        <button className="album-reveal-btn" onClick={showReveal} aria-label="View album cover">
-          <Disc3 size={18} />
-        </button>
-      )}
 
       {reveal && (
         <div className="album-reveal-overlay" onClick={dismissReveal}>
