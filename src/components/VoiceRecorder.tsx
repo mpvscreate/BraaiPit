@@ -6,7 +6,7 @@ import './VoiceRecorder.css'
 export interface VoiceMessage {
   audioUrl: string
   duration: number
-  transcript: string
+  transcript?: string
 }
 
 interface Props {

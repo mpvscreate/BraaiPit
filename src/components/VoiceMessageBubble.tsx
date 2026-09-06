@@ -4,7 +4,7 @@ import { Play, Pause } from 'lucide-react'
 interface Props {
   audioUrl: string
   duration: number
-  transcript: string
+  transcript?: string
 }
 
 export default function VoiceMessageBubble({ audioUrl, duration, transcript }: Props) {

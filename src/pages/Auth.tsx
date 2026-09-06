@@ -1,80 +1,34 @@
-import { useState, useEffect } from 'react'
-import { Flame, ArrowRight, Eye, EyeOff, Loader } from 'lucide-react'
-import { signUp, signIn, getStoredSession, type Member } from '../lib/supabase'
+import { useState } from 'react'
+import { Flame, ArrowRight, Loader } from 'lucide-react'
+import { joinWithName, type Member } from '../lib/supabase'
 import './Auth.css'
 
 interface Props {
   onAuth: (member: Member) => void
 }
 
-type Step = 'welcome' | 'join' | 'pin' | 'reenter'
+type Step = 'welcome' | 'join'
 
 export default function Auth({ onAuth }: Props) {
   const [step, setStep] = useState<Step>('welcome')
   const [name, setName] = useState('')
-  const [pin, setPin] = useState('')
-  const [showPin, setShowPin] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const [storedEmail, setStoredEmail] = useState<string | null>(null)
 
-  useEffect(() => {
-    const session = getStoredSession()
-    if (session) {
-      setName(session.name)
-      setStoredEmail(session.email)
-      setStep('reenter')
-    }
-  }, [])
-
-  async function handleSignUp() {
-    if (pin.length < 6) {
-      setError('PIN must be at least 6 digits')
-      return
-    }
-    setLoading(true)
-    setError('')
-    const result = await signUp(name.trim(), pin)
-    setLoading(false)
-    if ('error' in result) {
-      setError(result.error)
-    } else {
-      onAuth(result.member)
-    }
-  }
-
-  async function handleSignIn() {
-    if (pin.length < 6) {
-      setError('PIN must be at least 6 digits')
-      return
-    }
-    if (!storedEmail) return
-    setLoading(true)
-    setError('')
-    const result = await signIn(storedEmail, pin)
-    setLoading(false)
-    if ('error' in result) {
-      setError(result.error)
-    } else {
-      onAuth(result.member)
-    }
-  }
-
-  function handleJoin() {
+  async function handleJoin() {
     if (!name.trim()) {
       setError('Enter your name, boet!')
       return
     }
+    setLoading(true)
     setError('')
-    setStep('pin')
-  }
-
-  function switchToNewUser() {
-    setStoredEmail(null)
-    setName('')
-    setPin('')
-    setError('')
-    setStep('welcome')
+    const result = await joinWithName(name.trim())
+    setLoading(false)
+    if ('error' in result) {
+      setError(result.error)
+    } else {
+      onAuth(result.member)
+    }
   }
 
   if (step === 'welcome') {
@@ -98,133 +52,34 @@ export default function Auth({ onAuth }: Props) {
     )
   }
 
-  if (step === 'join') {
-    return (
-      <div className="auth-page auth-form-page">
-        <div className="auth-form-header">
-          <div className="auth-logo-sm">🔥</div>
-          <h2>What do they call you?</h2>
-          <p>Enter your name so the crew knows who you are</p>
-        </div>
-
-        <div className="auth-form">
-          <input
-            type="text"
-            placeholder="Your name"
-            value={name}
-            onChange={e => { setName(e.target.value); setError('') }}
-            onKeyDown={e => e.key === 'Enter' && handleJoin()}
-            autoFocus
-            maxLength={30}
-          />
-          {error && <span className="auth-error">{error}</span>}
-
-          <button className="btn-primary auth-btn" onClick={handleJoin} disabled={!name.trim()}>
-            Continue
-            <ArrowRight size={18} />
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (step === 'reenter') {
-    return (
-      <div className="auth-page auth-form-page">
-        <div className="auth-form-header">
-          <div className="auth-logo-sm">🔐</div>
-          <h2>Welcome back, {name}!</h2>
-          <p>Enter your PIN to get back in</p>
-        </div>
-
-        <div className="auth-form">
-          <div className="pin-input-wrap">
-            <input
-              type={showPin ? 'text' : 'password'}
-              placeholder="• • • •"
-              value={pin}
-              onChange={e => {
-                const v = e.target.value.replace(/\D/g, '').slice(0, 6)
-                setPin(v)
-                setError('')
-              }}
-              onKeyDown={e => e.key === 'Enter' && handleSignIn()}
-              inputMode="numeric"
-              autoFocus
-              className="pin-input"
-            />
-            <button
-              className="pin-toggle"
-              onClick={() => setShowPin(p => !p)}
-              aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
-            >
-              {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
-          </div>
-          {error && <span className="auth-error">{error}</span>}
-
-          <button
-            className="btn-primary auth-btn"
-            onClick={handleSignIn}
-            disabled={pin.length < 6 || loading}
-          >
-            {loading ? <><Loader size={18} className="spin" /> Signing in...</> : <>Let's go! <Flame size={18} /></>}
-          </button>
-
-          <button className="auth-switch" onClick={switchToNewUser}>
-            Not {name}? Join as someone else
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className="auth-page auth-form-page">
       <div className="auth-form-header">
-        <div className="auth-logo-sm">🔐</div>
-        <h2>Set your PIN</h2>
-        <p>Create a 6-digit PIN to secure your account</p>
+        <div className="auth-logo-sm">🔥</div>
+        <h2>What do they call you?</h2>
+        <p>Enter your name so the crew knows who you are</p>
       </div>
 
       <div className="auth-form">
-        <div className="pin-input-wrap">
-          <input
-            type={showPin ? 'text' : 'password'}
-            placeholder="• • • •"
-            value={pin}
-            onChange={e => {
-              const v = e.target.value.replace(/\D/g, '').slice(0, 6)
-              setPin(v)
-              setError('')
-            }}
-            onKeyDown={e => e.key === 'Enter' && handleSignUp()}
-            inputMode="numeric"
-            autoFocus
-            className="pin-input"
-          />
-          <button
-            className="pin-toggle"
-            onClick={() => setShowPin(p => !p)}
-            aria-label={showPin ? 'Hide PIN' : 'Show PIN'}
-          >
-            {showPin ? <EyeOff size={20} /> : <Eye size={20} />}
-          </button>
-        </div>
+        <input
+          type="text"
+          placeholder="Your name"
+          value={name}
+          onChange={e => { setName(e.target.value); setError('') }}
+          onKeyDown={e => e.key === 'Enter' && handleJoin()}
+          autoFocus
+          maxLength={30}
+        />
         {error && <span className="auth-error">{error}</span>}
 
         <button
           className="btn-primary auth-btn"
-          onClick={handleSignUp}
-          disabled={pin.length < 6 || loading}
+          onClick={handleJoin}
+          disabled={!name.trim() || loading}
         >
-          {loading ? <><Loader size={18} className="spin" /> Creating account...</> : <>Let's go! <Flame size={18} /></>}
+          {loading ? <><Loader size={18} className="spin" /> Joining...</> : <>Let's go! <ArrowRight size={18} /></>}
         </button>
       </div>
-
-      <p className="auth-welcome-name">
-        Welcome, <strong>{name}</strong>! 🤘
-      </p>
     </div>
   )
 }

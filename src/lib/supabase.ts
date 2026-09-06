@@ -41,40 +41,15 @@ export interface DbPost {
   author?: Member
 }
 
-const SESSION_KEY = 'braaipit_session'
-
-interface StoredSession {
-  email: string
-  memberId: string
-  name: string
-}
-
-export function getStoredSession(): StoredSession | null {
-  try {
-    const raw = localStorage.getItem(SESSION_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch { return null }
-}
-
-export function storeSession(session: StoredSession) {
-  try { localStorage.setItem(SESSION_KEY, JSON.stringify(session)) } catch {}
-}
-
 export function clearSession() {
-  try { localStorage.removeItem(SESSION_KEY) } catch {}
+  try { localStorage.removeItem('braaipit_session') } catch {}
 }
 
-export async function signUp(name: string, pin: string): Promise<{ member: Member } | { error: string }> {
-  const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '') || 'user'
-  const email = `${slug}-${crypto.randomUUID().slice(0, 8)}@example.com`
-
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email,
-    password: pin,
-  })
+export async function joinWithName(name: string): Promise<{ member: Member } | { error: string }> {
+  const { data: authData, error: authError } = await supabase.auth.signInAnonymously()
 
   if (authError || !authData.user) {
-    return { error: authError?.message || 'Sign up failed' }
+    return { error: authError?.message || 'Sign in failed' }
   }
 
   const { data: member, error: memberError } = await supabase
@@ -86,31 +61,6 @@ export async function signUp(name: string, pin: string): Promise<{ member: Membe
   if (memberError || !member) {
     return { error: memberError?.message || 'Failed to create profile' }
   }
-
-  storeSession({ email, memberId: member.id, name })
-  return { member: member as Member }
-}
-
-export async function signIn(email: string, pin: string): Promise<{ member: Member } | { error: string }> {
-  const { error: authError } = await supabase.auth.signInWithPassword({
-    email,
-    password: pin,
-  })
-
-  if (authError) {
-    return { error: authError.message }
-  }
-
-  const { data: session } = await supabase.auth.getSession()
-  if (!session.session) return { error: 'No session' }
-
-  const { data: member } = await supabase
-    .from('members')
-    .select()
-    .eq('auth_id', session.session.user.id)
-    .single()
-
-  if (!member) return { error: 'Member not found' }
 
   return { member: member as Member }
 }

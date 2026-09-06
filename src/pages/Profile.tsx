@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Camera, LogOut, Bell, Moon, Shield, Share2, ChevronRight, Copy, Check } from 'lucide-react'
+import { Camera, LogOut, Bell, Moon, Share2, ChevronRight, Copy, Check } from 'lucide-react'
 import { supabase, type Member } from '../lib/supabase'
 import './Profile.css'
 
@@ -67,11 +67,6 @@ export default function Profile({ member, onLogout }: Props) {
             <Moon size={20} />
             <span>Appearance</span>
             <span className="settings-value">Dark</span>
-            <ChevronRight size={18} className="settings-chevron" />
-          </button>
-          <button className="settings-item">
-            <Shield size={20} />
-            <span>Change PIN</span>
             <ChevronRight size={18} className="settings-chevron" />
           </button>
         </div>
