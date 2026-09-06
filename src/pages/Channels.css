@@ -16,7 +16,7 @@
   border-bottom: 1px solid var(--border);
   transition: background 0.15s;
   width: 100%;
-  background: rgba(10, 10, 10, 0.7);
+  background: rgba(10, 10, 10, 0.5);
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
 }

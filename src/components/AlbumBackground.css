@@ -1,81 +1,100 @@
-.album-bg {
+.album-bg-wrap {
   position: absolute;
   inset: 0;
   z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.album-bg {
+  position: absolute;
+  inset: 0;
   opacity: 0;
   transition: opacity 1.5s ease-out;
-  pointer-events: none;
 }
 
 .album-bg.visible {
   opacity: 1;
 }
 
+.album-bg-next {
+  opacity: 0;
+  animation: albumFadeIn 1.5s ease-out forwards;
+}
+
+@keyframes albumFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
 .album-bg-image {
   position: absolute;
-  inset: 0;
+  inset: -20px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  filter: blur(8px) saturate(1.2);
-  transform: scale(1.1);
+  filter: blur(2px) saturate(1.4) brightness(1);
 }
 
 .album-bg-darken {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-}
-
-.album-bg-tint {
-  position: absolute;
-  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
 }
 
 .album-bg-vignette {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(0, 0, 0, 0.6) 100%);
+  display: none;
 }
 
 .album-bg-info {
   position: absolute;
-  bottom: 80px;
-  right: 16px;
+  bottom: 76px;
+  right: 12px;
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 2px;
-  opacity: 0.35;
+  opacity: 0;
+  transition: opacity 1s ease-out;
   pointer-events: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.album-bg-info.visible {
+  opacity: 0.7;
 }
 
 .album-bg-name {
   font-family: var(--font-display);
-  font-size: 14px;
+  font-size: 13px;
   letter-spacing: 2px;
   color: #fff;
   text-transform: uppercase;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .album-bg-artist {
-  font-size: 11px;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.85);
   letter-spacing: 1px;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
+/* Light mode */
 :root[data-theme="light"] .album-bg-darken {
-  background: rgba(245, 240, 235, 0.6);
+  background: rgba(245, 240, 235, 0.2);
 }
 
-:root[data-theme="light"] .album-bg-vignette {
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(245, 240, 235, 0.7) 100%);
+:root[data-theme="light"] .album-bg-info {
+  background: rgba(255, 255, 255, 0.5);
 }
 
-:root[data-theme="light"] .album-bg-name,
+:root[data-theme="light"] .album-bg-name {
+  color: rgba(0, 0, 0, 0.8);
+}
+
 :root[data-theme="light"] .album-bg-artist {
-  color: rgba(0, 0, 0, 0.7);
-  text-shadow: none;
+  color: rgba(0, 0, 0, 0.6);
 }
