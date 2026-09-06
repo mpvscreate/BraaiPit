@@ -4,10 +4,9 @@ import { Play, Pause } from 'lucide-react'
 interface Props {
   audioUrl: string
   duration: number
-  transcript?: string
 }
 
-export default function VoiceMessageBubble({ audioUrl, duration, transcript }: Props) {
+export default function VoiceMessageBubble({ audioUrl, duration }: Props) {
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const audioRef = useRef<HTMLAudioElement | null>(null)
@@ -64,10 +63,6 @@ export default function VoiceMessageBubble({ audioUrl, duration, transcript }: P
           ))}
         </div>
         <span className="voice-duration">{formatTime(duration)}</span>
-      </div>
-      <div className="voice-transcript">
-        <span className="voice-transcript-label">Transcript:</span>
-        {transcript}
       </div>
     </div>
   )

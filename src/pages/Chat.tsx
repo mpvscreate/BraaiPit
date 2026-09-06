@@ -1,10 +1,14 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Image, Smile } from 'lucide-react'
+import { Send, Mic, Square, X, Flame } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import VoiceRecorder, { type VoiceMessage } from '../components/VoiceRecorder'
 import VoiceMessageBubble from '../components/VoiceMessageBubble'
 import { supabase, type Member } from '../lib/supabase'
 import './Chat.css'
+
+export interface VoiceMessage {
+  audioUrl: string
+  duration: number
+}
 
 interface Message {
   id: string
@@ -29,9 +33,15 @@ export default function Chat({ member }: Props) {
   const [newMessage, setNewMessage] = useState('')
   const [reactionTarget, setReactionTarget] = useState<string | null>(null)
   const [typing, setTyping] = useState<{ author: string; avatar: string } | null>(null)
+  const [isRecording, setIsRecording] = useState(false)
+  const [recordDuration, setRecordDuration] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const longPressTimer = useRef<number>(0)
   const loadedRef = useRef(false)
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null)
+  const chunksRef = useRef<Blob[]>([])
+  const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const recordStartRef = useRef(0)
 
   useEffect(() => {
     if (loadedRef.current) return
@@ -46,7 +56,7 @@ export default function Chat({ member }: Props) {
         schema: 'public',
         table: 'messages',
       }, async (payload) => {
-        const row = payload.new as { id: string; author_id: string; content: string; created_at: string; voice_url: string | null; voice_transcript: string | null }
+        const row = payload.new as { id: string; author_id: string; content: string; created_at: string; voice_url: string | null }
         if (row.author_id === member.id) return
 
         const { data: author } = await supabase
@@ -65,7 +75,7 @@ export default function Chat({ member }: Props) {
           content: row.content,
           timestamp: new Date(row.created_at),
           isOwn: false,
-          voice: row.voice_url ? { audioUrl: row.voice_url, duration: 0, transcript: row.voice_transcript || undefined } : undefined,
+          voice: row.voice_url ? { audioUrl: row.voice_url, duration: 0 } : undefined,
         }])
       })
       .on('postgres_changes', {
@@ -87,7 +97,7 @@ export default function Chat({ member }: Props) {
   async function loadMessages() {
     const { data: rows } = await supabase
       .from('messages')
-      .select('id, author_id, content, voice_url, voice_transcript, created_at, author:members!messages_author_id_fkey(id, name)')
+      .select('id, author_id, content, voice_url, created_at, author:members!messages_author_id_fkey(id, name)')
       .order('created_at', { ascending: true })
       .limit(100)
 
@@ -103,7 +113,7 @@ export default function Chat({ member }: Props) {
         content: row.content || '',
         timestamp: new Date(row.created_at),
         isOwn: row.author_id === member.id,
-        voice: row.voice_url ? { audioUrl: row.voice_url, duration: 0, transcript: row.voice_transcript || undefined } : undefined,
+        voice: row.voice_url ? { audioUrl: row.voice_url, duration: 0 } : undefined,
       }
     })
 
@@ -159,28 +169,92 @@ export default function Chat({ member }: Props) {
     }
   }
 
-  function handleVoice(voice: VoiceMessage) {
-    const tempId = Date.now().toString()
-    setMessages(prev => [...prev, {
-      id: tempId,
-      author: member.name,
-      avatar: member.name[0].toUpperCase(),
-      content: '',
-      timestamp: new Date(),
-      isOwn: true,
-      voice,
-    }])
+  async function startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4'
+      const mediaRecorder = new MediaRecorder(stream, { mimeType })
+      mediaRecorderRef.current = mediaRecorder
+      chunksRef.current = []
 
-    supabase
-      .from('messages')
-      .insert({ author_id: member.id, content: '', voice_transcript: voice.transcript || null })
-      .select()
-      .single()
-      .then(({ data }) => {
-        if (data) {
-          setMessages(prev => prev.map(m => m.id === tempId ? { ...m, dbId: data.id, id: data.id } : m))
-        }
-      })
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data)
+      }
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: mimeType })
+        const audioUrl = URL.createObjectURL(blob)
+        const finalDuration = Math.round((Date.now() - recordStartRef.current) / 1000)
+
+        const tempId = Date.now().toString()
+        setMessages(prev => [...prev, {
+          id: tempId,
+          author: member.name,
+          avatar: member.name[0].toUpperCase(),
+          content: '',
+          timestamp: new Date(),
+          isOwn: true,
+          voice: { audioUrl, duration: finalDuration },
+        }])
+
+        supabase
+          .from('messages')
+          .insert({ author_id: member.id, content: '' })
+          .select()
+          .single()
+          .then(({ data }) => {
+            if (data) {
+              setMessages(prev => prev.map(m => m.id === tempId ? { ...m, dbId: data.id, id: data.id } : m))
+            }
+          })
+
+        stream.getTracks().forEach(track => track.stop())
+      }
+
+      mediaRecorder.start()
+      recordStartRef.current = Date.now()
+      setIsRecording(true)
+      setRecordDuration(0)
+
+      recordTimerRef.current = setInterval(() => {
+        setRecordDuration(Math.round((Date.now() - recordStartRef.current) / 1000))
+      }, 200)
+    } catch {
+      // Microphone not available
+    }
+  }
+
+  function stopRecording() {
+    if (recordTimerRef.current) {
+      clearInterval(recordTimerRef.current)
+      recordTimerRef.current = null
+    }
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.stop()
+    }
+    setIsRecording(false)
+    setRecordDuration(0)
+  }
+
+  function cancelRecording() {
+    if (recordTimerRef.current) {
+      clearInterval(recordTimerRef.current)
+      recordTimerRef.current = null
+    }
+    if (mediaRecorderRef.current?.state === 'recording') {
+      mediaRecorderRef.current.onstop = null
+      mediaRecorderRef.current.stop()
+      const stream = mediaRecorderRef.current.stream
+      stream.getTracks().forEach(track => track.stop())
+    }
+    setIsRecording(false)
+    setRecordDuration(0)
+  }
+
+  function formatRecordTime(sec: number) {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
   }
 
   function handleLongPressStart(msgId: string) {
@@ -222,7 +296,7 @@ export default function Chat({ member }: Props) {
       <div className="chat-header-bar">
         <div className="chat-group-info">
           <div className="chat-group-avatars">
-            <span>🔥</span>
+            <Flame size={20} />
           </div>
           <div>
             <div className="chat-group-name">The Braai Pit Crew</div>
@@ -238,7 +312,7 @@ export default function Chat({ member }: Props) {
           </div>
         )}
 
-        {messages.map(msg => {
+        {messages.filter(m => m.content || m.voice).map(msg => {
           const showAvatar = msg.author !== lastAuthor
           lastAuthor = msg.author
           const hasReactions = msg.reactions && Object.keys(msg.reactions).length > 0
@@ -261,7 +335,6 @@ export default function Chat({ member }: Props) {
                     <VoiceMessageBubble
                       audioUrl={msg.voice.audioUrl}
                       duration={msg.voice.duration}
-                      transcript={msg.voice.transcript}
                     />
                   ) : (
                     <p>{msg.content}</p>
@@ -318,28 +391,39 @@ export default function Chat({ member }: Props) {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="chat-input-bar">
-        <button className="icon-btn" aria-label="Add emoji">
-          <Smile size={22} />
-        </button>
-        <input
-          type="text"
-          placeholder="Type a message..."
-          value={newMessage}
-          onChange={e => setNewMessage(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && sendMessage()}
-        />
-        <button className="icon-btn" aria-label="Add photo">
-          <Image size={22} />
-        </button>
-        {newMessage.trim() ? (
-          <button className="chat-send" onClick={sendMessage} aria-label="Send">
-            <Send size={18} />
+      {isRecording ? (
+        <div className="chat-input-bar recording">
+          <button className="icon-btn" onClick={cancelRecording} aria-label="Cancel">
+            <X size={20} />
           </button>
-        ) : null}
-      </div>
-
-      <VoiceRecorder onRecorded={handleVoice} />
+          <div className="recording-indicator">
+            <span className="recording-pulse" />
+            <span className="recording-timer">{formatRecordTime(recordDuration)}</span>
+          </div>
+          <button className="chat-send" onClick={stopRecording} aria-label="Send voice">
+            <Square size={14} fill="currentColor" />
+          </button>
+        </div>
+      ) : (
+        <div className="chat-input-bar">
+          <input
+            type="text"
+            placeholder="Type a message..."
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && sendMessage()}
+          />
+          {newMessage.trim() ? (
+            <button className="chat-send" onClick={sendMessage} aria-label="Send">
+              <Send size={18} />
+            </button>
+          ) : (
+            <button className="chat-mic" onClick={startRecording} aria-label="Record voice">
+              <Mic size={20} />
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
